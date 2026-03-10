@@ -1,0 +1,23 @@
+services:
+  backend:
+    build: ./Backend
+    container_name: packet-dashboard-backend
+    restart: unless-stopped
+    env_file: ./Backend/.env
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build:
+      context: ./Frontend
+      args:
+        VITE_API_URL: ""
+        VITE_SOCKET_URL: ""
+    container_name: packet-dashboard-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
