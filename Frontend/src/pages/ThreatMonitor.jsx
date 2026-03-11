@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getThreatStats, getTopIPs } from '../services/api';
 import { ShieldAlert, AlertTriangle, Globe, Shield } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useGeoLookup } from '../hooks/useGeoLookup';
 
 const LEVEL_CLS = {
   CRITICAL: {
@@ -49,6 +50,15 @@ const CustomTooltip = ({ active, payload }) => {
 function ThreatMonitor() {
   const [threats, setThreats] = useState({ summary: [], recent: [] });
   const [topIPs, setTopIPs] = useState({ topSources: [], topDestinations: [] });
+
+  // รวบรวม IP ทั้งหมดเพื่อ geo lookup
+  const allIPs = [
+    ...threats.recent.map((t) => t.sourceIP),
+    ...threats.recent.map((t) => t.destinationIP),
+    ...topIPs.topSources.map((s) => s.ip),
+    ...topIPs.topDestinations.map((d) => d.ip),
+  ].filter(Boolean);
+  const { getLabel, getFlag } = useGeoLookup(allIPs);
 
   const fetchData = async () => {
     try {
@@ -116,7 +126,18 @@ function ThreatMonitor() {
               <BarChart data={topIPs.topSources} layout="vertical" margin={{ left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e305830" horizontal={false} />
                 <XAxis type="number" tick={{ fill: '#4a5e80', fontSize: 10 }} axisLine={false} tickLine={false} />
-                <YAxis dataKey="ip" type="category" tick={{ fill: '#7b8ba8', fontSize: 9 }} width={100} axisLine={false} tickLine={false} />
+                <YAxis
+                  dataKey="ip"
+                  type="category"
+                  width={115}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={({ x, y, payload }) => (
+                    <text x={x} y={y} dy={3} textAnchor="end" fill="#7b8ba8" fontSize={9}>
+                      {getFlag(payload.value)} {payload.value}
+                    </text>
+                  )}
+                />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="count" radius={[0, 6, 6, 0]}>
                   {topIPs.topSources.map((_, i) => (
@@ -143,7 +164,18 @@ function ThreatMonitor() {
               <BarChart data={topIPs.topDestinations} layout="vertical" margin={{ left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e305830" horizontal={false} />
                 <XAxis type="number" tick={{ fill: '#4a5e80', fontSize: 10 }} axisLine={false} tickLine={false} />
-                <YAxis dataKey="ip" type="category" tick={{ fill: '#7b8ba8', fontSize: 9 }} width={100} axisLine={false} tickLine={false} />
+                <YAxis
+                  dataKey="ip"
+                  type="category"
+                  width={115}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={({ x, y, payload }) => (
+                    <text x={x} y={y} dy={3} textAnchor="end" fill="#7b8ba8" fontSize={9}>
+                      {getFlag(payload.value)} {payload.value}
+                    </text>
+                  )}
+                />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="count" radius={[0, 6, 6, 0]}>
                   {topIPs.topDestinations.map((_, i) => (
@@ -184,9 +216,19 @@ function ThreatMonitor() {
                 >
                   {t.threatLevel}
                 </span>
-                <span className="text-[#c5d0e0] font-mono text-[11px]">{t.sourceIP}</span>
-                <span className="text-[#2a3f5f]">→</span>
-                <span className="text-[#c5d0e0] font-mono text-[11px]">{t.destinationIP}</span>
+                <span className="text-[#c5d0e0] font-mono text-[11px]">
+                    {t.sourceIP}
+                    {getFlag(t.sourceIP) && (
+                      <span className="ml-1 text-xs" title={getLabel(t.sourceIP)}>{getFlag(t.sourceIP)}</span>
+                    )}
+                  </span>
+                  <span className="text-[#2a3f5f]">→</span>
+                  <span className="text-[#c5d0e0] font-mono text-[11px]">
+                    {t.destinationIP}
+                    {getFlag(t.destinationIP) && (
+                      <span className="ml-1 text-xs" title={getLabel(t.destinationIP)}>{getFlag(t.destinationIP)}</span>
+                    )}
+                  </span>
                 <span
                   className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#1e3058]/30 text-[#7b8ba8]"
                 >

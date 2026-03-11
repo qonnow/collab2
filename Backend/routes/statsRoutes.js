@@ -4,6 +4,7 @@ const Packet = require('../models/Packet');
 const { getIsConnected } = require('../config/db');
 const { getMemoryStore } = require('../services/packetService');
 const { authenticate } = require('../middleware/auth');
+const { lookupGeo } = require('../services/geoService');
 
 // ใช้ authenticate กับทุกเส้นทาง
 router.use(authenticate);
@@ -148,6 +149,46 @@ router.get('/top-ips', async (req, res) => {
     const topDestinations = Object.entries(dstMap).map(([ip, count]) => ({ ip, count })).sort((a, b) => b.count - a.count).slice(0, 10);
 
     res.json({ topSources, topDestinations });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/stats/geo - geolocation ของ source IP ทั้งหมด
+router.get('/geo', async (req, res) => {
+  try {
+    const isAdmin = req.user.role === 'admin';
+    const userId = isAdmin ? null : req.user.id;
+
+    let ipMap = {}; // ip → { count, suspiciousCount }
+
+    if (getIsConnected()) {
+      ipMap = await Packet.statsSourceIPs(userId);
+    } else {
+      const data = isAdmin ? getMemoryStore() : getMemoryStore().filter(p => p.userId === req.user.id);
+      for (const p of data) {
+        if (!ipMap[p.sourceIP]) ipMap[p.sourceIP] = { count: 0, suspiciousCount: 0 };
+        ipMap[p.sourceIP].count++;
+        if (p.isSuspicious) ipMap[p.sourceIP].suspiciousCount++;
+      }
+    }
+
+    // จัดกลุ่มตาม location
+    const locationMap = {};
+    for (const [ip, stats] of Object.entries(ipMap)) {
+      const geo = lookupGeo(ip);
+      if (!geo) continue;
+      const key = `${geo.lat},${geo.lon}`;
+      if (!locationMap[key]) {
+        locationMap[key] = { ...geo, count: 0, suspiciousCount: 0, sampleIPs: [] };
+      }
+      locationMap[key].count += stats.count;
+      locationMap[key].suspiciousCount += stats.suspiciousCount;
+      if (locationMap[key].sampleIPs.length < 3) locationMap[key].sampleIPs.push(ip);
+    }
+
+    const locations = Object.values(locationMap).sort((a, b) => b.count - a.count);
+    res.json({ locations });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

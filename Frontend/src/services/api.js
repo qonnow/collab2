@@ -24,6 +24,10 @@ export const updateProfile = (data) => api.put('/auth/profile', data);
 
 // API แพ็กเก็ต
 export const getPackets = (params = {}) => api.get('/packets', { params });
+// ดาวน์โหลดข้อมูลแพ็กเก็ตเป็น CSV หรือ JSON — ใช้ responseType blob เพื่อรับไฟล์โดยตรง
+export const exportPackets = (params = {}) => api.get('/packets/export', { params, responseType: 'blob' });
+// สร้างรายงาน PDF จาก backend — timeout 30s เพราะ pdfkit ใช้เวลา render
+export const generatePDFReport = (params = {}) => api.get('/reports/pdf', { params, responseType: 'blob', timeout: 30000 });
 export const getPacketById = (id) => api.get(`/packets/${id}`);
 export const encryptPayload = (payload) => api.post('/packets/encrypt', { payload });
 export const decryptPayload = (encryptedPayload) => api.post('/packets/decrypt', { encryptedPayload });
@@ -32,6 +36,9 @@ export const stopCapture = () => api.post('/packets/capture/stop');
 export const getCaptureStatus = () => api.get('/packets/capture/status');
 
 // API สถิติ
+export const getGeoStats = () => api.get('/stats/geo');
+// ส่ง array ของ IP ไปค้นหา geolocation แบบ batch ครั้งเดียว — รับกลับเป็น { ip: geoData }
+export const lookupIPs = (ips) => api.get('/geo/lookup', { params: { ips: ips.join(',') } });
 export const getOverviewStats = () => api.get('/stats/overview');
 export const getProtocolStats = () => api.get('/stats/protocols');
 export const getTimeline = (minutes = 30) => api.get(`/stats/timeline?minutes=${minutes}`);

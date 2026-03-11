@@ -17,10 +17,22 @@ const PROTOCOL_MAP = {
   25: 'SMTP',
 };
 
-// ช่วง IP จำลอง
+// Public IP ranges สำหรับจำลองแพ็กเก็ต — ทุก IP ค้นหาตำแหน่งได้จาก geoip-lite จริง
 const IP_RANGES = [
-  '192.168.1', '10.0.0', '172.16.0', '8.8.8', '1.1.1',
-  '203.0.113', '198.51.100', '93.184.216', '104.16.0',
+  // US
+  '8.8.8',       // Google DNS — Mountain View
+  '104.16.0',    // Cloudflare — San Jose
+  '93.184.216',  // Edgecast — Los Angeles
+  // Asia Pacific
+  '1.1.1',       // Cloudflare — Sydney, AU
+  '182.50.0',    // DTAC — Bangkok, TH
+  '103.86.96',   // NordVPN — Singapore
+  '203.208.39',  // Google — Hong Kong
+  '220.181.38',  // Baidu — Beijing, CN
+  // Europe
+  '91.108.4',    // Telegram — Amsterdam, NL
+  '116.202.120', // Hetzner — Nuremberg, DE
+  '185.199.108', // GitHub CDN — EU
 ];
 
 // แผนที่ Cipher Suite ตามวิธีเข้ารหัส

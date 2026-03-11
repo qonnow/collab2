@@ -12,6 +12,9 @@ const packetRoutes = require('./routes/packetRoutes');
 const statsRoutes = require('./routes/statsRoutes');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const geoRoutes = require('./routes/geoRoutes');
+// reportRoutes — สร้างรายงาน PDF สรุปผล Network Packet (ใช้ pdfkit)
+const reportRoutes = require('./routes/reportRoutes');
 const setupSocket = require('./sockets/packetSocket');
 
 const app = express();
@@ -47,9 +50,11 @@ const authLimiter = rateLimit({
   message: { error: 'Too many requests, please try again later.' },
 });
 
-const apiLimiter = rateLimit({
+// apiLimiter ต้องสร้างแยกกันสำหรับแต่ละ route group
+// เพราะ express-rate-limit นับ counter รวมกัน ทำให้หมดโควต้าเร็ว
+const makeApiLimiter = (max = 1000) => rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests, please try again later.' },
@@ -59,10 +64,13 @@ const apiLimiter = rateLimit({
 app.set('io', io);
 
 // เส้นทาง API
-app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/packets', apiLimiter, packetRoutes);
-app.use('/api/stats', apiLimiter, statsRoutes);
-app.use('/api/admin', apiLimiter, adminRoutes);
+app.use('/api/auth',    authLimiter,       authRoutes);
+app.use('/api/packets', makeApiLimiter(),   packetRoutes);
+app.use('/api/stats',   makeApiLimiter(),   statsRoutes);
+app.use('/api/admin',   makeApiLimiter(),   adminRoutes);
+app.use('/api/geo',     makeApiLimiter(),   geoRoutes);
+// /api/reports ใช้ rate limiter แยกต่างหากเพื่อไม่ให้กระทบ endpoint อื่น
+app.use('/api/reports', makeApiLimiter(),   reportRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

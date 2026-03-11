@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, List, Lock, ShieldAlert, Wifi, WifiOff, Activity, Radio, LogOut, User, Settings, Crown } from 'lucide-react';
+import { LayoutDashboard, List, Lock, ShieldAlert, Globe, Wifi, WifiOff, Activity, Radio, LogOut, User, Settings, Crown } from 'lucide-react';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard, desc: 'Overview & stats' },
   { path: '/packets', label: 'Packets', icon: List, desc: 'Browse captured data' },
   { path: '/encryption', label: 'Encryption', icon: Lock, desc: 'AES encrypt/decrypt' },
   { path: '/threats', label: 'Threats', icon: ShieldAlert, desc: 'Security monitor' },
+  { path: '/geo', label: 'Geo Map', icon: Globe, desc: 'IP geolocation map' },
   { path: '/profile', label: 'Profile', icon: Settings, desc: 'Account settings' },
 ];
 
@@ -29,7 +30,7 @@ function Sidebar({ isConnected, isCapturing, user, onLogout }) {
       <div className="mx-6 h-px bg-divider-h" />
 
       {/* Navigation */}
-      <nav className="flex-1 px-5 py-6 space-y-2">
+      <nav className="flex-1 min-h-0 overflow-y-auto px-5 py-6 space-y-2">
         <p className="text-[11px] font-semibold text-[#4a5e80] uppercase tracking-widest px-3 mb-4">Navigation</p>
         {navItems.map(({ path, label, icon: Icon, desc }) => (
           <NavLink

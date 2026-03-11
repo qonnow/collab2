@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import PacketList from './pages/PacketList';
 import EncryptionTool from './pages/EncryptionTool';
 import ThreatMonitor from './pages/ThreatMonitor';
+import GeoMap from './pages/GeoMap';
 import ProfileSettings from './pages/ProfileSettings';
 import AdminPanel from './pages/AdminPanel';
 import Login from './pages/Login';
@@ -105,6 +106,7 @@ function App() {
               <Route path="/packets" element={<PacketList user={user} />} />
               <Route path="/encryption" element={<EncryptionTool />} />
               <Route path="/threats" element={<ThreatMonitor />} />
+              <Route path="/geo" element={<GeoMap isCapturing={isCapturing} />} />
               <Route path="/profile" element={<ProfileSettings user={user} onUpdate={(u) => setUser((prev) => ({ ...prev, ...u }))} />} />
               {user?.role === 'admin' && (
                 <Route path="/admin" element={<AdminPanel />} />
