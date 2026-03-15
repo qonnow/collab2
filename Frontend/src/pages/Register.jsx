@@ -190,7 +190,7 @@ function Register({ onRegister, onSwitchToLogin }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl text-sm font-bold text-white transition-all duration-300 disabled:opacity-40 hover:translate-y-[-1px] active:translate-y-0 cursor-pointer mt-2 bg-gradient-register-btn shadow-[0_4px_25px_rgba(16,185,129,0.35),inset_0_1px_0_rgba(255,255,255,0.1)]"
+              className="w-full flex items-center justify-center gap-2.5 py-3.5 px-3 rounded-xl text-sm font-bold text-white transition-all duration-300 disabled:opacity-40 hover:translate-y-[-1px] active:translate-y-0 cursor-pointer mt-2 bg-gradient-register-btn shadow-[0_4px_25px_rgba(16,185,129,0.35),inset_0_1px_0_rgba(255,255,255,0.1)]"
             >
               {loading ? (
                 <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
